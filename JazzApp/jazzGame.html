@@ -1,0 +1,1553 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Music chord quizz app</title>
+    <meta name="description" content="Music chord quizz app.">
+    <meta name="author" content="SitePoint">
+
+    <meta property="og:title" content="A Basic HTML5 Template">
+    <meta property="og:type" content="website">
+    <meta property="og:description" content="Music chord quizz app.">
+    <meta property="og:image" content="image.png">
+
+    <link rel="icon" href="assets/">
+    <link rel="icon" href="assets/" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="assets/">
+    <!-- <link rel="stylesheet" type="text/css" href="static/styles.css"> -->
+
+</head>
+
+<body onload="NextQuestion(0)">
+    <main>
+        <!-- creating a modal for when quiz ends -->
+        <div class="modal-container" id="score-modal">
+
+            <div class="modal-content-container">
+
+                <h1>Congratulations, Quiz Completed.</h1>
+
+                <div class="grade-details">
+                    <p>Attempts : <span id="total-score1"></span></p>
+                    <p>Wrong Answers : <span id="wrong-answers"></span></p>
+                    <p>Right Answers : <span id="right-answers"></span></p>
+                    <p>Grade : <span id="grade-percentage"></span>%</p>
+                    <p><span id="test_duration"></span></p>
+                    <p><span id="remarks"></span></p>
+                </div>
+
+                <div class="modal-button-container">
+                    <button onclick="closeScoreModal()">Continue</button>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="game-quiz-container" id="questionDisplayContainer">
+
+            <div class="game-details-container">
+                <h1>Score : <span id="player-score"></span> / <span id="total-score2"></span></h1>
+                <h1> Question : <span id="question-number"></span> / <span id="total-score3"></span></h1>
+                <h1> <span id="timer"></span></h1>
+                <h1>
+                    <label class="switch">
+                        <input id="show-timer" type="checkbox" onchange='handleChange(this);'>
+                        <span class="slider round"></span>
+                    </label> <span style="color: crimson;">Timer</span>
+                </h1>
+                <h1><button onclick="reStartGame()" class="restartGame" style="margin-right: 0px;">Restart</button></h1>
+                <!-- <h1><button onclick="setGameQuestions()" class="btn" id="btn-modal">Setting</button></h1> -->
+                <h1><a href="#" id="mySizeChart" class="setGame"
+                        style="padding: 5px; text-decoration: none;">Settings</a></h1>
+            </div>
+
+
+            <div id="mySizeChartModal" class="ebcf_modal">
+
+                <div class="ebcf_modal-content">
+                    <span class="ebcf_close">&times;</span>
+                    <h2 style="line-height:70px; color:teal;">Select questions to include in the test <br></h2>
+                    <div id="questions_container" style="overflow-y: scroll; height:300px; max-height: 400px;">
+                    </div>
+                    <button onclick="setGameQuestions()" id="questionSelect" class="setGame"
+                        style="margin-right: 10px; width: auto; padding: 15px; height: auto;">Set questions</button>
+
+                </div>
+
+            </div>
+
+
+            <div class="game-question-container" id="game-question-container-display">
+                <h1 id="display-question"></h1>
+            </div>
+
+            <div class="game-options-container">
+                <div class="modal-container" id="option-modal">
+                    <div class="modal-content-container">
+                        <h1>Please Pick An Option</h1>
+                        <div class="modal-button-container">
+                            <button onclick="closeOptionModal()">Continue</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="outer_options_container">
+                    <div id="options_container">
+                    </div>
+                </div>
+
+                <div style="width: auto;">
+                    <!-- <button onclick="handleFillOption('')" class="setGame"></button> -->
+
+                    <!-- <button onclick="handleFillOption('A')" class="setGame">A</button>
+                    <button onclick="handleFillOption('A#')" class="setGame">A#</button>
+                    <button onclick="handleFillOption('B')" class="setGame">B</button>
+                    <button onclick="handleFillOption('B#')" class="setGame">B#</button>
+                    <button onclick="handleFillOption('C')" class="setGame">C</button>
+                    <button onclick="handleFillOption('C#')" class="setGame">C#</button>
+                    <button onclick="handleFillOption('D')" class="setGame">D</button>
+                    <button onclick="handleFillOption('D# E♭')" class="setGame">D# E♭</button>
+                    <button onclick="handleFillOption('E')" class="setGame">E</button>
+                    <button onclick="handleFillOption('E#')" class="setGame">E#</button>
+                    <button onclick="handleFillOption('F')" class="setGame">F</button>
+                    <button onclick="handleFillOption('F#')" class="setGame">F#</button>
+                    <button onclick="handleFillOption('G')" class="setGame">G</button>
+                    <button onclick="handleFillOption('G#')" class="setGame">G#</button> -->
+
+                </div>
+                <br />
+
+            </div>
+
+            <div id='piano'>
+                <div id='keys'></div>
+            </div>
+            <div class="next-button-container">
+                <button onclick="handleSubmitQuestion()" id="submit" style="margin-right: 10px;">Submit</button>
+
+                <button onclick="handleNextQuestion()" id="next-question" style="margin-left: 35px;">Next
+                    Question</button>
+            </div>
+
+
+
+        </div>
+
+    </main>
+
+    <!-- script for game logic -->
+    <script>
+        const questionsArray = [
+            {
+                question: "A Major Triad",
+                options: [
+                    {
+                        name: "5thbox",
+                        answer: "E",
+                        prefil: false,
+                        label: "5th",
+                    },
+                    {
+                        name: "3rdbox",
+                        answer: "C# D♭",
+                        prefil: false,
+                        label: "3rd",
+                    },
+                    {
+                        name: "Rootbox",
+                        answer: "A",
+                        prefil: false,
+                        label: "Root",
+                    },
+                ]
+            },
+            {
+                question: "B♭ Major Triad",
+                options: [
+                    {
+                        name: "5thbox",
+                        answer: "F",
+                        prefil: false,
+                        label: "5th",
+                    },
+                    {
+                        name: "3rdbox",
+                        answer: "D",
+                        prefil: false,
+                        label: "3rd",
+                    },
+                    {
+                        name: "Rootbox",
+                        answer: "A# B♭",
+                        prefil: false,
+                        label: "Root",
+                    },
+                ]
+            },
+            {
+                question: "B Major Triad",
+                options: [
+                    {
+                        name: "5thbox",
+                        answer: "F# G♭",
+                        prefil: false,
+                        label: "5th",
+                    },
+                    {
+                        name: "3rdbox",
+                        answer: "D# E♭",
+                        prefil: false,
+                        label: "3rd",
+                    },
+                    {
+                        name: "Rootbox",
+                        answer: "B",
+                        prefil: false,
+                        label: "Root",
+                    },
+                ]
+            },
+            {
+                question: "C Major Triad",
+                options: [
+                    {
+                        name: "5thbox",
+                        answer: "G",
+                        prefil: false,
+                        label: "5th",
+                    },
+                    {
+                        name: "3rdbox",
+                        answer: "E",
+                        prefil: false,
+                        label: "3rd",
+                    },
+                    {
+                        name: "Rootbox",
+                        answer: "C",
+                        prefil: false,
+                        label: "Root",
+                    },
+                ]
+            },
+            {
+                question: "D♭ Major Triad",
+                options: [
+                    {
+                        name: "5thbox",
+                        answer: "G# A♭",
+                        prefil: false,
+                        label: "5th",
+                    },
+                    {
+                        name: "3rdbox",
+                        answer: "F",
+                        prefil: false,
+                        label: "3rd",
+                    },
+                    {
+                        name: "Rootbox",
+                        answer: "C# D♭",
+                        prefil: false,
+                        label: "Root",
+                    },
+                ]
+            },
+            {
+                question: "D Major Triad",
+                options: [
+                    {
+                        name: "5thbox",
+                        answer: "A",
+                        prefil: false,
+                        label: "5th",
+                    },
+                    {
+                        name: "3rdbox",
+                        answer: "F# G♭",
+                        prefil: false,
+                        label: "3rd",
+                    },
+                    {
+                        name: "Rootbox",
+                        answer: "D",
+                        prefil: false,
+                        label: "Root",
+                    },
+                ]
+            },
+            {
+                question: "E♭ Major Triad",
+                options: [
+                    {
+                        name: "5thbox",
+                        answer: "A# B♭",
+                        prefil: false,
+                        label: "5th",
+                    },
+                    {
+                        name: "3rdbox",
+                        answer: "G",
+                        prefil: false,
+                        label: "3rd",
+                    },
+                    {
+                        name: "Rootbox",
+                        answer: "D# E♭",
+                        prefil: false,
+                        label: "Root",
+                    },
+                ]
+            },
+            {
+                question: "E Major Triad",
+                options: [
+                    {
+                        name: "5thbox",
+                        answer: "B",
+                        prefil: false,
+                        label: "5th",
+                    },
+                    {
+                        name: "3rdbox",
+                        answer: "G# A♭",
+                        prefil: false,
+                        label: "3rd",
+                    },
+                    {
+                        name: "Rootbox",
+                        answer: "E",
+                        prefil: false,
+                        label: "Root",
+                    },
+                ]
+            },
+            {
+                question: "F Major Triad",
+                options: [
+                    {
+                        name: "5thbox",
+                        answer: "C",
+                        prefil: false,
+                        label: "5th",
+                    },
+                    {
+                        name: "3rdbox",
+                        answer: "A",
+                        prefil: false,
+                        label: "3rd",
+                    },
+                    {
+                        name: "Rootbox",
+                        answer: "F",
+                        prefil: false,
+                        label: "Root",
+                    },
+                ]
+            },
+            {
+                question: "F# Major Triad",
+                options: [
+                    {
+                        name: "5thbox",
+                        answer: "C# D♭",
+                        prefil: false,
+                        label: "5th",
+                    },
+                    {
+                        name: "3rdbox",
+                        answer: "A# B♭",
+                        prefil: false,
+                        label: "3rd",
+                    },
+                    {
+                        name: "Rootbox",
+                        answer: "F# G♭",
+                        prefil: false,
+                        label: "Root",
+                    },
+                ]
+            },
+            {
+                question: "G♭ Major Triad",
+                options: [
+                    {
+                        name: "5thbox",
+                        answer: "C# D♭",
+                        prefil: false,
+                        label: "5th",
+                    },
+                    {
+                        name: "3rdbox",
+                        answer: "A# B♭",
+                        prefil: false,
+                        label: "3rd",
+                    },
+                    {
+                        name: "Rootbox",
+                        answer: "F# G♭",
+                        prefil: false,
+                        label: "Root",
+                    },
+                ]
+            },
+            {
+                question: "G Major Triad",
+                options: [
+                    {
+                        name: "5thbox",
+                        answer: "D",
+                        prefil: false,
+                        label: "5th",
+                    },
+                    {
+                        name: "3rdbox",
+                        answer: "B",
+                        prefil: false,
+                        label: "3rd",
+                    },
+                    {
+                        name: "Rootbox",
+                        answer: "G",
+                        prefil: false,
+                        label: "Root",
+                    },
+                ]
+            },
+            {
+                question: "A♭ Major Triad",
+                options: [
+                    {
+                        name: "5thbox",
+                        answer: "D# E♭",
+                        prefil: false,
+                        label: "5th",
+                    },
+                    {
+                        name: "3rdbox",
+                        answer: "C",
+                        prefil: false,
+                        label: "3rd",
+                    },
+                    {
+                        name: "Rootbox",
+                        answer: "G# A♭",
+                        prefil: false,
+                        label: "Root",
+                    },
+                ]
+            },
+        ];
+
+        let questions = questionsArray;
+        let selectedQuestions = [];
+        let shuffledQuestions = []; //empty array to hold shuffled selected questions
+        async function handleQuestions() {
+            //function to shuffle and push 10 questions to shuffledQuestions array
+            while (shuffledQuestions.length <= questions.length - 1) {
+                const random = questions[Math.floor(Math.random() * questions.length)];
+                if (!shuffledQuestions.includes(random)) {
+                    shuffledQuestions.push(random);
+                }
+            }
+        }
+
+        let totalScore = questions.reduce(function (accumulator, currentValue) {
+            return accumulator + currentValue.options.length
+        }, 0);
+
+        let totalQuestions = questions.length;
+
+        let questionNumber = 1;
+        let playerScore = 0;
+        let indexNumber = 0;
+        let wrongAttempts = 0;
+        let pass = false;
+        let timerVar = null;
+        let totalSeconds = 0;
+        let hour = 00;
+        let minute = 00;
+        let seconds = 00;
+        let submitButton = document.getElementById("submit");
+        let nextButton = document.getElementById("next-question");
+        let currentInutFieldId;
+        let inputValid = false;
+
+        // Get the modal
+        var ebModal = document.getElementById('mySizeChartModal');
+
+        // Get the button that opens the modal
+        var ebBtn = document.getElementById("mySizeChart");
+
+        // Get the <span> element that closes the modal
+        var ebSpan = document.getElementsByClassName("ebcf_close")[0];
+
+        // When the user clicks the button, open the modal 
+        ebBtn.onclick = function () {
+            ebModal.style.display = "block";
+
+            questionsArray.forEach((question, index) => {
+                let input = document.createElement("input");
+                let parent = document.getElementById("questions_container");
+                input.setAttribute('type', 'checkbox');
+                input.setAttribute('id', `${index + 1}checkbox`);
+                input.setAttribute('name', `${index + 1}`);
+                label = document.createElement('label');
+                label.setAttribute('for', `${index + 1}`);
+                label.setAttribute('id', `${index + 1}label`);
+                label.innerText = question.question;
+                parent.appendChild(label);
+                parent.appendChild(input);
+                parent.appendChild(document.createElement('br'));
+                parent.appendChild(document.createElement('br'));
+
+            });
+
+        }
+
+        // When the user clicks on <span> (x), close the modal
+        ebSpan.onclick = function () {
+            removeModalTags();
+            ebModal.style.display = "none";
+        }
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function (event) {
+            if (event.target == ebModal) {
+                removeModalTags();
+                ebModal.style.display = "none";
+            }
+        }
+
+        async function removeModalTags() {
+            questionsArray.forEach((question, index) => {
+                let input = document.getElementById(`${index + 1}checkbox`);
+                if (input) {
+                    input.remove();
+                }
+                let label = document.getElementById(`${index + 1}label`);
+                if (label) {
+                    label.remove();
+                }
+            });
+        }
+
+        async function handleFillOption(inp) {
+            console.log(inp)
+            console.log("here: ", currentInutFieldId);
+            let parent = document.getElementById("options_container");
+            for (let i = 0; i < parent.children.length; i++) {
+                if (parent.children[i].tagName === "INPUT" && parent.children[i].id === String(currentInutFieldId)) {
+                    console.log(parent.children[i]);
+                    parent.children[i].value = inp;
+                }
+                //console.log(parent.children[i].id);
+            }
+        }
+
+        async function setGameQuestions() {
+            console.log("setGameQuestions");
+            let temp = [];
+            await questionsArray.forEach((question, index) => {
+                let input = document.getElementById(`${index + 1}checkbox`);
+                if (input && input.checked) {
+                    temp.push(questionsArray[index]);
+                    input.remove();
+                    let label = document.getElementById(`${index + 1}label`);
+                    label.remove();
+                }
+            });
+
+            if (temp.length > 0) {
+                totalQuestions = temp.length;
+                questionNumber = 1;
+                playerScore = 0;
+                indexNumber = 0;
+                wrongAttempts = 0;
+                await removeModalTags();
+                await removeH5Tags(false);
+                questions = temp;
+                shuffledQuestions = [];
+                submitButton.disabled = false
+                nextButton.disabled = true
+                NextQuestion(0);
+                ebModal.style.display = "none";
+            }
+            else {
+                alert("You haven't check any question yet!!!");
+            }
+        }
+
+        function handleChange(checkbox) {
+            if (checkbox.checked == true) {
+                timerVar = setInterval(countTimer, 1000);
+            } else {
+                timerVar = null;
+                hour = 00;
+                totalSeconds = 0;
+                minute = 00;
+                seconds = 00;
+                document.getElementById("timer").innerHTML = '';
+                document.getElementById("test_duration").innerHTML = '';
+            }
+        }
+
+        function countTimer() {
+            ++totalSeconds;
+            hour = Math.floor(totalSeconds / 3600);
+            minute = Math.floor((totalSeconds - hour * 3600) / 60);
+            seconds = totalSeconds - (hour * 3600 + minute * 60);
+            if (hour < 10)
+                hour = "0" + hour;
+            if (minute < 10)
+                minute = "0" + minute;
+            if (seconds < 10)
+                seconds = "0" + seconds;
+            let timerToggle = document.getElementById("show-timer");
+            if (timerToggle.checked) {
+                document.getElementById("timer").innerHTML = "Time : " + hour + ":" + minute + ":" + seconds;
+                document.getElementById("test_duration").innerHTML = "Time : " + hour + ":" + minute + ":" + seconds;
+            }
+            else {
+                timerVar = null;
+                hour = 00;
+                minute = 00;
+                seconds = 00;
+                totalSeconds = 0;
+                document.getElementById("timer").innerHTML = '';
+                document.getElementById("test_duration").innerHTML = '';
+            }
+        }
+
+        // function for displaying next question in the array to dom
+        function NextQuestion(index) {
+            handleQuestions()
+            pass = false;
+            const currentQuestion = shuffledQuestions[index];
+            document.getElementById("question-number").innerHTML = questionNumber;
+            document.getElementById("player-score").innerHTML = playerScore;
+            document.getElementById("display-question").innerHTML = currentQuestion.question;
+            document.getElementById("total-score1").innerHTML = questionNumber;
+            document.getElementById("total-score2").innerHTML = totalQuestions;
+            document.getElementById("total-score3").innerHTML = totalQuestions;
+
+            currentQuestion && currentQuestion.options.forEach(option => {
+                let input = document.createElement("input");
+                let parent = document.getElementById("options_container");
+                input.setAttribute('type', 'text');
+                input.setAttribute('id', `${option.name}input`);
+                input.setAttribute('maxLength', 1);
+                input.setAttribute("required", "");
+                input.setAttribute('name', option.name);
+                if (option.prefil)
+                    input.setAttribute('value', option.answer);
+                label = document.createElement('label');
+                label.setAttribute('for', option.name);
+                label.setAttribute('id', `${option.name}label`);
+                label.innerText = option.label;
+
+                input.addEventListener('focus', e => {
+                    //console.log("event", e.target)
+                    input.style.border = '5px dotted orange';
+                    currentInutFieldId = e.target.id;
+                    console.log("currentInutFieldId:) ", currentInutFieldId)
+                });
+
+                input.addEventListener('blur', e => {
+                    input.style.border = '2px solid #eee';
+                    // input.style.margin = '10px 0';
+                    //input.style.position = 'initial';
+                });
+                parent.appendChild(label);
+                parent.appendChild(input);
+                parent.appendChild(document.createElement('br'));
+            });
+        }
+
+
+        async function checkForAnswer() {
+            console.log("shuffledQuestions", shuffledQuestions)
+            console.log("indexNumber", indexNumber)
+            const currentQuestion = shuffledQuestions[indexNumber]; //gets current Question 
+            const options = currentQuestion.options;
+            let rights = 0;
+            for (let i = 0; i < options.length; i++) {
+                let userEntry = document.getElementById(`${options[i].name}input`);
+
+                if (userEntry.value.length === 0) {
+                    inputValid = false;
+                    alert(`Enter a value for ${options[i].label}`);
+                    break;
+                }
+                else {
+                    inputValid = true;
+                    if (userEntry.value.split(' ')
+                        .map(w => w[0].toUpperCase() + w.substr(1).toLowerCase())
+                        .join(' ') === options[i].answer) {
+                        document.getElementById(`${options[i].name}input`).style.backgroundColor = "green";
+                        rights++;
+                    }
+
+                    else if (userEntry.value.split(' ')
+                        .map(w => w[0].toUpperCase() + w.substr(1).toLowerCase())
+                        .join(' ') !== options[i].answer) {
+                        let element = document.createElement("h5");
+                        element.setAttribute('id', `${options[i].name}h5tag`);
+                        let parent = document.getElementById("game-question-container-display");
+                        element.innerText = `${options[i].label} = ${options[i].answer}`;
+                        parent.appendChild(element);
+                        document.getElementById(`${options[i].name}input`).style.backgroundColor = "red";
+                    }
+
+                    document.getElementById("question-number").innerHTML = questionNumber;
+                    document.getElementById("player-score").innerHTML = playerScore;
+
+                    if (i === options.length - 1) {
+                        pass = true;
+                    }
+                }
+            };
+
+            if (rights === options.length) {
+                playerScore++;
+            }
+            else {
+                wrongAttempts++;
+            }
+            //set to delay question number till when next question loads
+            setTimeout(() => {
+                questionNumber++;
+            }, 1000);
+        };
+
+        async function handleSubmitQuestion() {
+            await checkForAnswer();
+            if (inputValid) {
+                submitButton.disabled = true
+                nextButton.disabled = false
+            }
+        }
+        //called when the next button is called
+        async function handleNextQuestion() {
+            if (pass) {
+                //delays next question displaying for a second
+                setTimeout(async () => {
+                    if (indexNumber === questions.length - 1) {
+                        await handleEndGame();
+
+                        submitButton.disabled = true
+                        nextButton.disabled = true
+                    }
+                    else {
+                        await removeH5Tags();
+                        submitButton.disabled = false
+                        nextButton.disabled = true
+                        NextQuestion(indexNumber);
+                    }
+                }, 1000);
+            }
+        }
+
+        async function removeH5Tags(increaseIndex = true) {
+            const currentQuestion = shuffledQuestions[indexNumber] //gets current Question 
+            await currentQuestion.options.forEach(option => {
+                let h5tag = document.getElementById(`${option.name}h5tag`);
+                if (h5tag) {
+                    h5tag.remove();
+                }
+                let input = document.getElementById(`${option.name}input`);
+                if (input) {
+                    input.remove();
+                }
+                let label = document.getElementById(`${option.name}label`);
+                if (label) {
+                    label.remove();
+                }
+            });
+            const cell = document.getElementsByTagName('br');
+            const length = cell.length;
+            for (let i = 0; i < length; i++) {
+                cell[0].parentNode.removeChild(cell[0]);
+            };
+            if (increaseIndex)
+                indexNumber++;
+        };
+
+        // function for when all questions being answered
+        function handleEndGame() {
+            console.log(timerVar)
+            clearInterval(timerVar);
+            timerVar = null;
+            let remark = null;
+            let remarkColor = null;
+            // condition check for player remark and remark color
+            if (playerScore <= totalQuestions * 0.30) {
+                remark = "Bad Grades, Keep Practicing."
+                remarkColor = "red"
+            }
+            else if (playerScore >= totalQuestions * 0.40 && playerScore < totalQuestions * 0.70) {
+                remark = "Average Grades, You can do better.";
+                remarkColor = "orange";
+            }
+            else if (playerScore >= totalQuestions * 0.70) {
+                remark = "Excellent, Keep the good work going.";
+                remarkColor = "green";
+            }
+            const playerGrade = (playerScore / totalQuestions) * 100;
+            //data to display to score board
+            document.getElementById('remarks').innerHTML = remark
+            document.getElementById('remarks').style.color = remarkColor
+            document.getElementById('grade-percentage').innerHTML = playerGrade.toFixed(2);
+            document.getElementById("player-score").innerHTML = playerScore;
+            document.getElementById('wrong-answers').innerHTML = wrongAttempts;
+            document.getElementById('right-answers').innerHTML = playerScore;
+            document.getElementById('score-modal').style.display = "flex"
+        }
+
+        //closes score modal and resets game
+        function closeScoreModal() {
+            document.getElementById('score-modal').style.display = "none";
+        }
+
+        async function reStartGame() {
+            //await removeH5Tags();
+            // questionNumber = 1;
+            // playerScore = 0;
+            // wrongAttempt = 0;
+            // indexNumber = 0;
+            // shuffledQuestions = [];
+            // NextQuestion(indexNumber);
+            location.reload();
+        }
+
+        //function to close warning modal
+        function closeOptionModal() {
+            document.getElementById('option-modal').style.display = "none";
+        }
+    </script>
+    <!-- style for game -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+
+        /* The Modal (background) */
+        .ebcf_modal {
+            display: none;
+            /* Hidden by default */
+            position: fixed;
+            /* Stay in place */
+            z-index: 1;
+            /* Sit on top */
+            padding-top: 100px;
+            /* Location of the box */
+            left: 0;
+            top: 0;
+            width: 100%;
+            /* Full width */
+            height: 100%;
+            /* Full height */
+            overflow: auto;
+            /* Enable scroll if needed */
+            background-color: rgb(0, 0, 0);
+            /* Fallback color */
+            background-color: rgba(0, 0, 0, 0.4);
+            /* Black w/ opacity */
+        }
+
+        /* Modal Content */
+        .ebcf_modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 40px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        /* The Close Button */
+        .ebcf_close {
+            color: #aaaaaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .ebcf_close:hover,
+        .ebcf_close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked+.slider {
+            background-color: #2196F3;
+        }
+
+        input:focus+.slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked+.slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+
+
+        input[type=text] {
+            margin: 10px 0;
+            border: 2px solid #eee;
+            padding: 12px;
+            box-shadow: 0 0 15px 4px rgba(0, 0, 0, 0.06);
+            background-color: rgb(182, 194, 194);
+            text-transform: capitalize;
+            position: initial;
+            margin-left: 20px;
+        }
+
+        h5 {
+            margin: 10px 0;
+            border: 2px solid #eee;
+            padding: 10px;
+            color: #ffffff;
+            box-shadow: 0 0 15px 4px rgba(0, 0, 0, 0.06);
+            background-color: green;
+        }
+
+        label {
+            padding-right: 10px;
+        }
+
+
+        body {
+            font-family: 'Montserrat', serif;
+        }
+
+        main {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: black;
+            background: url('../assets/background.jpg');
+            background-color: rgb(14, 155, 190);
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .game-quiz-container {
+            width: 50rem;
+            height: 37rem;
+            padding: 10px;
+            background-color: lightgray;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-around;
+            border-radius: 30px;
+        }
+
+        #outer_options_container {
+            display: flex;
+            flex-direction: column-reverse;
+        }
+
+        .game-details-container {
+            width: 80%;
+            height: 4rem;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .restartGame {
+            width: 5rem;
+            height: 2rem;
+            border-radius: 10px;
+            background: #2196F3;
+            color: #ffffff;
+            font-weight: 600;
+            border: 2px solid gray;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .restartGame:hover {
+            background-color: rgb(139, 11, 11);
+        }
+
+        .setGame {
+            width: 5rem;
+            height: 2rem;
+            border-radius: 10px;
+            background: #292d30;
+            color: #ffffff;
+            font-weight: 600;
+            border: 2px solid gray;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .setGame:hover {
+            background-color: rgb(139, 11, 11);
+        }
+
+        .game-details-container h1 {
+            font-size: 1.2rem;
+        }
+
+        .game-question-container {
+            width: 80%;
+            height: 8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid darkgray;
+            border-radius: 25px;
+        }
+
+        .game-question-container h1 {
+            font-size: 1.1rem;
+            text-align: center;
+            padding: 3px;
+        }
+
+        .game-options-container {
+            width: 80%;
+            height: auto;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-around;
+        }
+
+        .game-options-container span {
+            width: 45%;
+            height: 3rem;
+            border: 2px solid darkgray;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+
+
+
+        span label {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.3s;
+            font-weight: 600;
+            color: rgb(22, 22, 22);
+        }
+
+        span label:hover {
+            -ms-transform: scale(1.12);
+            -webkit-transform: scale(1.12);
+            transform: scale(1.12);
+            color: white;
+        }
+
+
+        .next-button-container {
+            width: 50%;
+            height: 3rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .next-button-container button {
+            width: 8rem;
+            height: 2rem;
+            border-radius: 10px;
+            background: none;
+            color: rgb(25, 25, 25);
+            font-weight: 600;
+            border: 2px solid gray;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .next-button-container button:hover {
+            background-color: rgb(11, 139, 43);
+        }
+
+        .modal-container {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            -webkit-animation: fadeIn 1.2s ease-in-out;
+            animation: fadeIn 1.2s ease-in-out;
+        }
+
+        .modal-content-container {
+            height: 20rem;
+            width: 25rem;
+            background-color: rgb(43, 42, 42);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-around;
+            border-radius: 25px;
+        }
+
+        .modal-content-container h1 {
+            font-size: 1.3rem;
+            height: 3rem;
+            color: lightgray;
+            text-align: center;
+        }
+
+        .grade-details {
+            width: 15rem;
+            height: 10rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-around;
+        }
+
+        .grade-details p {
+            color: white;
+            text-align: center;
+        }
+
+        .modal-button-container {
+            height: 2rem;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-button-container button {
+            width: 10rem;
+            height: 2rem;
+            background: none;
+            outline: none;
+            border: 1px solid rgb(160, 56, 46);
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border-radius: 20px;
+        }
+
+        .modal-button-container button:hover {
+            background-color: rgb(25, 78, 192);
+        }
+
+        @media(min-width : 300px) and (max-width : 350px) {
+            .game-quiz-container {
+                width: 90%;
+                height: 80vh;
+
+            }
+
+            .game-details-container h1 {
+                font-size: 0.8rem;
+            }
+
+            .game-question-container {
+                height: 6rem;
+
+            }
+
+            .game-question-container h1 {
+                font-size: 0.9rem;
+            }
+
+            .game-options-container span {
+                width: 90%;
+                height: 2.5rem;
+            }
+
+            .game-options-container span label {
+                font-size: 0.8rem;
+            }
+
+            .modal-content-container {
+                width: 90%;
+                height: 25rem;
+            }
+
+            .modal-content-container h1 {
+                font-size: 1.2rem;
+
+            }
+        }
+
+        @media(min-width : 350px) and (max-width : 700px) {
+            .game-quiz-container {
+                width: 90%;
+                height: 80vh;
+            }
+
+            .game-details-container h1 {
+                font-size: 1rem;
+            }
+
+            .game-question-container {
+                height: 8rem;
+            }
+
+            .game-question-container h1 {
+                font-size: 0.9rem;
+            }
+
+            .game-options-container span {
+                width: 90%;
+            }
+
+            .modal-content-container {
+                width: 90%;
+                height: 25rem;
+            }
+
+            .modal-content-container h1 {
+                font-size: 1.2rem;
+            }
+        }
+
+
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @-webkit-keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+
+    <!-- script for piano -->
+    <script>
+        const keys = document.querySelector('#keys');
+        const volPlus = document.querySelector('.fa-plus')
+        const volMinus = document.querySelector('.fa-minus');
+        const volume = 2;
+
+        const notBlack = [4, 7, 11, 14];
+        var j = 1;
+        //stores list of notes in order of piano
+        const notesEnteredText = ["F", "G", "A", "B", "C", "D", "E", "F", "G", "A", "B", "C", "D", "E", "F# G♭", "G# A♭", "A# B♭", "C# D♭", "D# E♭", "F# G♭", "G# A♭", "A# B♭", "C# D♭", "D# E♭"];
+        const notesKeysText = ["F", "G", "A", "B", "C", "D", "E", "F", "G", "A", "B", "C", "D", "E", "F# G♭", "G# A♭", "A# B♭", "Blank", "C# D♭", "D# E♭", "Blank", "F# G♭", "G# A♭", "A# B♭", "", "C# D♭", "D# E♭"];
+
+
+        for (let i = 0; i < 14; i++) {
+            let whitekey = document.createElement('div');
+
+            // text inside of white key
+            whitekey.innerText = notesKeysText[i];
+            whitekey.style.textAlign = "center";
+            whitekey.style.paddingTop = '90px';
+            whitekey.classList.add('whiteKeys', 'key');
+            whitekey.classList.add(`key${j}`)
+            whitekey.style.left = (i * 7) + '%';
+
+            keys.appendChild(whitekey);
+            j += 1
+        }
+        for (let i = 1; i < 14; i++) {
+            if (!notBlack.includes(i)) {
+                let blackKey = document.createElement('div');
+ 
+                // text inside of black key
+                blackKey.innerText = notesKeysText[i + 13];
+                blackKey.style.fontSize = "15px";
+                blackKey.style.color = "white";
+                blackKey.style.textAlign = "center";
+                blackKey.style.paddingTop = '20px';
+
+                blackKey.classList.add('blackKeys', 'key');
+                blackKey.classList.add(`key${j}`)
+                blackKey.style.width = "20px";
+                blackKey.style.height = "70px";
+
+                blackKey.style.left = (i * (7) - 2.2) + '%'
+
+                keys.appendChild(blackKey);
+                j += 1;
+            }
+        }
+
+
+
+
+        var key = Array.from(document.querySelectorAll('.key'))
+
+        key.forEach(k => {
+            k.addEventListener('click', () => {
+                // this is where we can populate the handle
+                //however keys are by list so we will need to make a dictionary of key name associated with each other
+                // handleFillOption('A');
+                handleFillOption(notesEnteredText[(`${k.classList[2]}`.substring(3)) - 1]);
+                let keySound = new sound(`sounds/${k.classList[2]}.mp3`, parseInt(volume.textContent))
+                keySound.play();
+            })
+        })
+        var keyPressed = {};
+        const keyPress = (event) => {
+            let keyCode = event.keyCode;
+            let keyDown = (event.type == 'keydown');
+
+            keyPressed[keyCode] = keyDown;
+
+            if (keyPressed[37]) {
+                const eventVal = {
+                    '65': 'key1',
+                    '83': 'key2',
+                    '68': 'key3',
+                    '70': 'key4',
+                    '71': 'key5',
+                    '72': 'key6',
+                    '74': 'key7'
+                }
+                Object.keys(eventVal).forEach(key => {
+
+                    if (keyPressed[key]) {
+                        document.querySelector(`.${eventVal[key]}`).style.background = 'linear-gradient(to bottom, rgb(248, 248, 248), rgb(238, 238, 238), grey)';
+                        document.querySelector(`.${eventVal[key]}`).style.boxShadow = ' 2px -2px black inset, -4px -2px black inset';
+                        setTimeout(() => {
+                            document.querySelector(`.${eventVal[key]}`).style.background = 'white';
+                            document.querySelector(`.${eventVal[key]}`).style.boxShadow = ' none';
+                        }, 250)
+                        let keySound = new sound(`sounds/${eventVal[key]}.mp3`, parseInt(volume.textContent))
+                        keySound.play();
+                    }
+
+                })
+
+            }
+            if (keyPressed[39]) {
+                const eventVal = {
+                    '65': 'key8',
+                    '83': 'key9',
+                    '68': 'key10',
+                    '70': 'key11',
+                    '71': 'key12',
+                    '72': 'key13',
+                    '74': 'key14'
+                }
+                Object.keys(eventVal).forEach(key => {
+
+                    if (keyPressed[key]) {
+                        document.querySelector(`.${eventVal[key]}`).style.background = 'linear-gradient(to bottom, rgb(248, 248, 248), rgb(238, 238, 238), grey)';
+                        document.querySelector(`.${eventVal[key]}`).style.boxShadow = ' 2px -2px black inset, -4px -2px black inset';
+                        setTimeout(() => {
+                            document.querySelector(`.${eventVal[key]}`).style.background = 'white';
+                            document.querySelector(`.${eventVal[key]}`).style.boxShadow = ' none';
+                        }, 250)
+                        let keySound = new sound(`sounds/${eventVal[key]}.mp3`, parseInt(volume.textContent))
+                        keySound.play();
+                    }
+
+                })
+
+            }
+
+            const eventVal = {
+                '81': 'key15',
+                '87': 'key16',
+                '69': 'key17',
+                '82': 'key18',
+                '84': 'key19',
+                '89': 'key20',
+                '85': 'key21',
+                '73': 'key22',
+                '79': 'key23',
+                '80': 'key24'
+            }
+            Object.keys(eventVal).forEach(key => {
+
+                if (keyPressed[key]) {
+                    document.querySelector(`.${eventVal[key]}`).style.background = 'black';
+                    setTimeout(() => { document.querySelector(`.${eventVal[key]}`).style.background = 'rgb(71, 71, 71)'; }, 250)
+                    let keySound = new sound(`sounds/${eventVal[key]}.mp3`, parseInt(volume.textContent))
+                    keySound.play();
+                }
+
+            })
+
+
+
+
+        }
+        window.addEventListener('keydown', keyPress)
+
+        window.addEventListener('keyup', (event) => {
+
+            keyPressed[event.keyCode] = false;
+        })
+
+        function sound(src, vol) {
+            this.sound = document.createElement('audio')
+            this.sound.src = src;
+            this.sound.setAttribute("preload", "auto");
+            this.sound.setAttribute("controls", "none");
+            this.sound.volume = 2 * 0.5; //could put volume instead of 2
+            this.sound.style.display = "none";
+            document.body.appendChild(this.sound);
+            this.play = function () {
+                this.sound.play();
+            }
+        }
+    </script>
+
+    <!-- style for piano -->
+    <style>
+        #piano {
+            margin: auto;
+            margin-bottom: 1vh;
+            width: 70%;
+            max-width: 800px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            position: relative;
+        }
+
+        #keys {
+            width: 90%;
+            position: absolute;
+            bottom: 5px;
+            height: 60%;
+            margin: 5%;
+
+            -webkit-user-select: none;
+            /* Safari */
+            -moz-user-select: none;
+            /* Firefox */
+            -ms-user-select: none;
+            /* IE10+/Edge */
+            user-select: none;
+        }
+
+        .whiteKeys {
+            width: 7%;
+            height: 100%;
+            background-color: white;
+            position: absolute;
+            border: 2px solid black;
+            cursor: pointer;
+        }
+
+        .whiteKeys:active {
+            background: linear-gradient(to bottom, rgb(248, 248, 248), rgb(238, 238, 238), grey);
+            box-shadow: 2px -2px black inset, -4px -2px black inset;
+        }
+
+        .whiteKeys:hover {
+            background-color: rgb(228, 228, 228);
+        }
+
+        .blackKeys {
+            width: 3.5%;
+            height: 50%;
+            background-color: rgb(71, 71, 71);
+            position: absolute;
+            cursor: pointer;
+        }
+
+        .blackKeys:hover {
+            background-color: rgb(36, 36, 36);
+        }
+
+        .blackKeys:active {
+            background-color: black;
+        }
+    </style>
+</body>
+
+</html>
